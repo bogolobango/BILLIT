@@ -790,6 +790,7 @@ function ProposalEditor({ content, activeSection }: { content: ProposalContent |
     .join("<hr/>") || ""
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       UnderlineExt,
