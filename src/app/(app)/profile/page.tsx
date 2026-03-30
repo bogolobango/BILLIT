@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Building2, Upload, Save, CheckCircle2 } from "lucide-react"
+import { Building2, Upload, Save, CheckCircle2, Globe, Loader2 } from "lucide-react"
 import type { Profile } from "@/lib/types"
 
 const AEC_SERVICES = [
@@ -37,6 +37,56 @@ export default function ProfilePage() {
   })
   const [certificationsInput, setCertificationsInput] = useState("")
   const [saved, setSaved] = useState(false)
+  const [websiteUrl, setWebsiteUrl] = useState("")
+  const [scraping, setScraping] = useState(false)
+  const [scrapeResult, setScrapeResult] = useState<string | null>(null)
+  const [scrapeError, setScrapeError] = useState<string | null>(null)
+
+  async function handleScrapeWebsite() {
+    if (!websiteUrl.trim()) return
+
+    setScraping(true)
+    setScrapeResult(null)
+    setScrapeError(null)
+
+    try {
+      const response = await fetch("/api/ai/scrape-website", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: websiteUrl }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to scan website")
+      }
+
+      const data = await response.json()
+
+      // Populate form fields with extracted data
+      setProfile((prev) => ({
+        ...prev,
+        company_name: data.company_name || prev.company_name,
+        services: data.services || prev.services,
+        bio: data.bio || prev.bio,
+        industry_focus: data.industry_focus || prev.industry_focus,
+      }))
+
+      if (data.certifications && data.certifications.length > 0) {
+        setCertificationsInput(data.certifications.join(", "))
+      }
+
+      const teamCount = data.team_members?.length || 0
+      const projectCount = data.past_projects?.length || 0
+      setScrapeResult(
+        `Extracted ${teamCount} team member${teamCount !== 1 ? "s" : ""} and ${projectCount} project${projectCount !== 1 ? "s" : ""} from your website`
+      )
+    } catch (err) {
+      setScrapeError(err instanceof Error ? err.message : "An error occurred")
+    } finally {
+      setScraping(false)
+    }
+  }
 
   function handleServiceToggle(service: string, checked: boolean) {
     setProfile((prev) => ({
@@ -68,6 +118,58 @@ export default function ProfilePage() {
           Define your company information. This data powers AI-generated proposals tailored to your firm.
         </p>
       </div>
+
+      {/* Auto-Populate from Website */}
+      <Card>
+        <CardHeader className="bg-slate-900 text-white rounded-t-lg">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Auto-Populate from Website
+          </CardTitle>
+          <CardDescription className="text-slate-300">
+            Save time by scanning your firm&apos;s website to automatically extract company details, team members, and project history
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Input
+              placeholder="https://www.yourfirm.com"
+              value={websiteUrl}
+              onChange={(e) => setWebsiteUrl(e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              onClick={handleScrapeWebsite}
+              disabled={scraping || !websiteUrl.trim()}
+              variant="outline"
+              className="shrink-0"
+            >
+              {scraping ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <Globe className="h-4 w-4" />
+                  Scan Website
+                </>
+              )}
+            </Button>
+          </div>
+          {scrapeResult && (
+            <div className="mt-3 flex items-center gap-2 rounded-md bg-emerald-50 border border-emerald-200 px-4 py-3">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+              <p className="text-sm text-emerald-700 font-medium">{scrapeResult}</p>
+            </div>
+          )}
+          {scrapeError && (
+            <div className="mt-3 flex items-center gap-2 rounded-md bg-red-50 border border-red-200 px-4 py-3">
+              <p className="text-sm text-red-700 font-medium">{scrapeError}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Separator />
 

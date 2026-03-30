@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
   FilePlus,
+  Target,
   Building2,
   Users,
   FolderKanban,
@@ -23,6 +24,11 @@ const navItems = [
     label: "New Proposal",
     href: "/proposals/new",
     icon: FilePlus,
+  },
+  {
+    label: "Go/No-Go",
+    href: "/proposals/evaluate",
+    icon: Target,
   },
   {
     label: "divider",
@@ -65,19 +71,24 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
-      <div className="flex items-center gap-2 px-6 h-16 border-b border-sidebar-border">
-        <div className="h-8 w-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-          <Building2 className="h-5 w-5 text-sidebar-primary-foreground" />
+    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-sidebar border-r border-sidebar-border">
+      {/* Logo */}
+      <div className="flex items-center gap-3 px-6 h-16 border-b border-sidebar-border">
+        <div className="h-8 w-8 rounded-lg bg-sidebar-primary flex items-center justify-center shadow-sm">
+          <Building2 className="h-4.5 w-4.5 text-sidebar-primary-foreground" />
         </div>
-        <span className="text-lg font-bold tracking-tight">BILLIT</span>
+        <div>
+          <span className="text-base font-bold tracking-tight text-sidebar-foreground">BILLIT</span>
+          <span className="text-[10px] font-medium text-muted-foreground ml-1.5 bg-muted px-1.5 py-0.5 rounded">BETA</span>
+        </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {navItems.map((item, i) => {
           if (item.label === "divider") {
             return (
-              <div key={i} className="my-3 h-px bg-sidebar-border" />
+              <div key={i} className="my-3 mx-3 h-px bg-sidebar-border" />
             )
           }
 
@@ -89,21 +100,22 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium",
                 isActive
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive ? "text-sidebar-primary" : "text-muted-foreground")} />
               {item.label}
             </Link>
           )
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-sidebar-border">
-        <p className="px-3 text-xs text-sidebar-foreground/50">
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-sidebar-border">
+        <p className="text-[11px] text-muted-foreground">
           AI-Powered AEC Proposals
         </p>
       </div>

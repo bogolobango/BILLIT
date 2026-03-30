@@ -45,43 +45,93 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Autodesk/Box-inspired clean professional palette */
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.984 0.003 247.858);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(0.984 0.003 247.858);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(0.984 0.003 247.858);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.929 0.013 255.508);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.929 0.013 255.508);
-  --muted-foreground: oklch(0.554 0.023 264.364);
-  --accent: oklch(0.929 0.013 255.508);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.869 0.022 252.894);
-  --input: oklch(0.869 0.022 252.894);
-  --ring: oklch(0.527 0.063 275.273);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.129 0.042 264.695);
-  --sidebar-foreground: oklch(0.929 0.013 255.508);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.208 0.042 265.755);
-  --sidebar-accent-foreground: oklch(0.929 0.013 255.508);
-  --sidebar-border: oklch(0.278 0.033 256.848);
-  --sidebar-ring: oklch(0.527 0.063 275.273);
+
+  /* Light, airy backgrounds — Box-style */
+  --background: #f9fafb;
+  --foreground: #111827;
+
+  /* White cards with subtle borders — WeTransfer-style */
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+
+  /* Autodesk blue primary — professional, trustworthy */
+  --primary: #0696d7;
+  --primary-foreground: #ffffff;
+
+  /* Subtle gray secondaries */
+  --secondary: #f3f4f6;
+  --secondary-foreground: #374151;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #eff6ff;
+  --accent-foreground: #1e40af;
+
+  --destructive: #ef4444;
+
+  /* Clean, thin borders */
+  --border: #e5e7eb;
+  --input: #d1d5db;
+  --ring: #0696d7;
+
+  /* Chart colors — modern data viz palette */
+  --chart-1: #0696d7;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #8b5cf6;
+  --chart-5: #ef4444;
+
+  /* Light sidebar — Box/Autodesk style instead of dark */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #374151;
+  --sidebar-primary: #0696d7;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eff6ff;
+  --sidebar-accent-foreground: #0696d7;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #0696d7;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Inter", var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth transitions everywhere */
+* {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Clean scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Focus ring style — Autodesk-inspired */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
