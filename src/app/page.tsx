@@ -310,7 +310,20 @@ export default function LandingPage() {
 
       {/* How It Works */}
       <section id="how-it-works" className="border-t border-gray-100 bg-gray-50 py-20 sm:py-24 relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-6">
+        {/* Architectural blueprint grid background */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.07]" style={{
+          backgroundImage: `
+            linear-gradient(rgba(6,150,215,0.4) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(6,150,215,0.4) 1px, transparent 1px),
+            linear-gradient(rgba(6,150,215,0.2) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(6,150,215,0.2) 1px, transparent 1px)
+          `,
+          backgroundSize: '100px 100px, 100px 100px, 20px 20px, 20px 20px',
+        }} />
+        <div className="absolute top-12 right-16 w-52 h-52 rounded-full border border-[#0696d7]/[0.06] pointer-events-none" />
+        <div className="absolute top-16 right-20 w-44 h-44 rounded-full border border-dashed border-[#0696d7]/[0.04] pointer-events-none" />
+        <div className="absolute bottom-16 left-12 w-36 h-36 rounded-full border border-[#0696d7]/[0.05] pointer-events-none" />
+        <div className="mx-auto max-w-6xl px-6 relative">
           <AnimatedSection>
             <div className="mx-auto max-w-2xl text-center mb-14">
               <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
@@ -389,8 +402,30 @@ export default function LandingPage() {
       </section>
 
       {/* ROI Calculator — Interactive */}
-      <section className="border-t border-gray-100 bg-gray-50 py-20 sm:py-24">
-        <div className="mx-auto max-w-6xl px-6">
+      <section className="border-t border-gray-100 bg-gray-50 py-20 sm:py-24 relative overflow-hidden">
+        {/* Topographic contour line background */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="topo" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+              <path d="M 0 80 Q 50 40 100 80 T 200 80" fill="none" stroke="#0696d7" strokeWidth="0.8"/>
+              <path d="M 0 120 Q 50 80 100 120 T 200 120" fill="none" stroke="#0696d7" strokeWidth="0.6"/>
+              <path d="M 0 160 Q 50 120 100 160 T 200 160" fill="none" stroke="#0696d7" strokeWidth="0.5"/>
+              <path d="M 0 40 Q 50 0 100 40 T 200 40" fill="none" stroke="#0696d7" strokeWidth="0.5"/>
+              <circle cx="100" cy="100" r="30" fill="none" stroke="#0696d7" strokeWidth="0.4"/>
+              <circle cx="100" cy="100" r="50" fill="none" stroke="#0696d7" strokeWidth="0.3"/>
+              <circle cx="100" cy="100" r="70" fill="none" stroke="#0696d7" strokeWidth="0.2"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#topo)" />
+        </svg>
+        {/* Diagonal measurement lines */}
+        <div className="absolute top-0 right-0 w-64 h-64 pointer-events-none opacity-[0.04]" style={{
+          backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 30px, #0696d7 30px, #0696d7 31px)',
+        }} />
+        <div className="absolute bottom-0 left-0 w-48 h-48 pointer-events-none opacity-[0.04]" style={{
+          backgroundImage: 'repeating-linear-gradient(-45deg, transparent, transparent 25px, #0696d7 25px, #0696d7 26px)',
+        }} />
+        <div className="mx-auto max-w-6xl px-6 relative">
           <AnimatedSection>
             <div className="mx-auto max-w-2xl text-center mb-14">
               <div className="inline-flex items-center gap-2 text-[#0696d7] mb-3">
@@ -550,6 +585,16 @@ export default function LandingPage() {
 
       {/* Final CTA */}
       <section className="border-t border-gray-100 bg-gray-50 py-20 sm:py-24 relative overflow-hidden">
+        {/* Isometric grid background */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.05]" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="iso" x="0" y="0" width="56" height="100" patternUnits="userSpaceOnUse">
+              <path d="M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100" fill="none" stroke="#0696d7" strokeWidth="0.5"/>
+              <path d="M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34" fill="none" stroke="#0696d7" strokeWidth="0.3"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#iso)" />
+        </svg>
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-gradient-to-b from-[#0696d7]/5 to-transparent blur-3xl" />
         </div>
