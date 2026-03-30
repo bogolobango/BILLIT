@@ -162,15 +162,16 @@ export default function NewProposalPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          rfpText,
-          scopingData,
+          rfp_text: rfpText,
+          scoping_data: scopingData,
           profile: { company_name: companyName, services: [], certifications: [], bio: "", industry_focus: "" },
-          teamMembers: selectedTeam.filter(t => t.selected),
-          pastProjects: selectedProjects.filter(p => p.selected),
-          pastProposalTexts: [],
+          team_members: selectedTeam.filter(t => t.selected),
+          past_projects: selectedProjects.filter(p => p.selected),
+          past_proposal_texts: [],
         }),
       })
       const data = await res.json()
+      if (!res.ok || !data.sections) throw new Error(data.error || "Invalid response")
       setProposalContent(data)
     } catch {
       // Inline fallback
@@ -789,6 +790,7 @@ function ProposalEditor({ content, activeSection }: { content: ProposalContent |
     .join("<hr/>") || ""
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       UnderlineExt,
