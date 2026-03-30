@@ -1,337 +1,111 @@
 import Link from "next/link"
 import {
-  Clock,
-  Target,
-  FileX,
-  Upload,
-  PenLine,
-  Download,
-  Brain,
-  ShieldCheck,
-  MessageSquareQuote,
-  Library,
-  Check,
   ArrowRight,
-  Zap,
+  FileText,
+  Sparkles,
+  Download,
+  ShieldCheck,
+  Target,
+  Users,
+  Clock,
+  Check,
+  Building2,
+  Calculator,
 } from "lucide-react"
-
-const painPoints = [
-  {
-    icon: Clock,
-    stat: "40-80 Hours",
-    description:
-      "Average time AEC firms spend per proposal. That's non-billable time your team can't afford to waste.",
-  },
-  {
-    icon: Target,
-    stat: "23% Win Rate",
-    description:
-      "Industry average for proposal submissions. Most firms respond to too many RFPs they're not positioned to win.",
-  },
-  {
-    icon: FileX,
-    stat: "67% Recreated",
-    description:
-      "Of proposal content already exists somewhere in your firm. But finding and reusing it? That's the real challenge.",
-  },
-]
-
-const steps = [
-  {
-    number: "01",
-    icon: Upload,
-    title: "Upload Your RFP",
-    description:
-      "Paste your RFP, email, or project description. Our AI extracts requirements, deadlines, and compliance needs.",
-  },
-  {
-    number: "02",
-    icon: PenLine,
-    title: "Review & Customize",
-    description:
-      "AI generates a complete proposal using your firm's voice, past projects, and team credentials. Edit inline.",
-  },
-  {
-    number: "03",
-    icon: Download,
-    title: "Export & Win",
-    description:
-      "Download as PDF or Word. Track status. Build your win rate over time.",
-  },
-]
-
-const features = [
-  {
-    icon: Brain,
-    title: "AEC-Specific AI",
-    description:
-      "Not a generic AI tool. Built with knowledge of scope phases, fee structures, deliverable types, and AEC terminology.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Compliance Matrix",
-    description:
-      "AI parses RFP requirements and flags what's met, what's missing, and what needs attention before you submit.",
-  },
-  {
-    icon: MessageSquareQuote,
-    title: "Your Firm's Voice",
-    description:
-      "Upload past winning proposals. AI learns your tone, approach, and how you describe your work.",
-  },
-  {
-    icon: Library,
-    title: "Smart Content Reuse",
-    description:
-      "Reference past projects and team credentials. AI weaves them into each new proposal naturally.",
-  },
-]
-
-const pricingTiers = [
-  {
-    name: "Starter",
-    price: 49,
-    description: "For firms exploring AI-assisted proposals",
-    features: [
-      "Single proposal generation",
-      "RFP parsing & scoping",
-      "Compliance checklist",
-      "PDF export",
-      "Basic editing tools",
-    ],
-    cta: "Get Started",
-    highlighted: false,
-  },
-  {
-    name: "Professional",
-    price: 99,
-    description: "For firms that need to win consistently",
-    features: [
-      "Everything in Starter",
-      "Firm voice matching",
-      "Team & project integration",
-      "Word & PDF export",
-      "Section regeneration",
-      "Priority AI processing",
-    ],
-    cta: "Start Winning",
-    highlighted: true,
-  },
-  {
-    name: "Enterprise",
-    price: 149,
-    description: "For firms pursuing high-value contracts",
-    features: [
-      "Everything in Professional",
-      "Advanced compliance analysis",
-      "Multi-proposal comparison",
-      "Custom section templates",
-      "Dedicated support",
-      "API access",
-    ],
-    cta: "Contact Sales",
-    highlighted: false,
-  },
-]
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="fixed top-0 z-50 w-full border-b border-slate-800/50 bg-[#0f172a]/95 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 font-bold text-white text-sm">
-              B
+      <nav className="fixed top-0 z-50 w-full border-b border-gray-200 bg-white/90 backdrop-blur-sm">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0696d7]">
+              <Building2 className="h-4.5 w-4.5 text-white" />
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">
-              BILLIT
-            </span>
+            <span className="text-base font-bold tracking-tight text-gray-900">BILLIT</span>
           </div>
           <div className="hidden items-center gap-8 md:flex">
-            <a
-              href="#how-it-works"
-              className="text-sm text-slate-400 transition-colors hover:text-white"
-            >
-              How It Works
-            </a>
-            <a
-              href="#features"
-              className="text-sm text-slate-400 transition-colors hover:text-white"
-            >
-              Features
-            </a>
-            <a
-              href="#pricing"
-              className="text-sm text-slate-400 transition-colors hover:text-white"
-            >
-              Pricing
-            </a>
+            <a href="#how-it-works" className="text-sm text-gray-500 hover:text-gray-900">How It Works</a>
+            <a href="#features" className="text-sm text-gray-500 hover:text-gray-900">Features</a>
+            <a href="#pricing" className="text-sm text-gray-500 hover:text-gray-900">Pricing</a>
           </div>
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-slate-300 transition-colors hover:text-white"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex h-9 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-600/40"
-            >
-              Start Free
+            <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900">Sign In</Link>
+            <Link href="/proposals/new" className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#0696d7] px-4 text-sm font-medium text-white hover:bg-[#0580b8]">
+              Try Free <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-[#0f172a] pt-16">
-        {/* Background grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
-        {/* Gradient orb */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full bg-blue-600/10 blur-[128px]" />
-
-        <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-24 sm:pb-32 sm:pt-32 lg:pb-40 lg:pt-40">
-          <div className="mx-auto max-w-4xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-sm text-blue-400">
-              <Zap className="h-3.5 w-3.5" />
-              AI-Powered Proposal Generation for AEC
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.1]">
-              Generate AEC Proposals in{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                60 Seconds
-              </span>
-              , Not 60 Hours
+      <section className="pt-14">
+        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
+          <div className="mx-auto max-w-3xl text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl leading-[1.15]">
+              An RFP just hit your inbox.<br />
+              <span className="text-gray-400">You have 2 weeks and no proposal team.</span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-400 sm:text-xl">
-              AI-powered proposal generation built specifically for Architecture,
-              Engineering, and Construction firms. Upload your RFP, and get a
-              personalized, compliance-checked proposal draft instantly.
+            <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-gray-600 sm:text-lg">
+              Paste your RFP. Get a complete, personalized proposal back — with your team, your projects, your voice. Ready to submit.
             </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="mt-8">
               <Link
-                href="/login"
-                className="inline-flex h-12 items-center gap-2 rounded-lg bg-blue-600 px-8 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-600/40 hover:translate-y-[-1px]"
+                href="/proposals/new"
+                className="inline-flex h-12 items-center gap-2 rounded-lg bg-[#0696d7] px-8 text-base font-semibold text-white shadow-sm hover:bg-[#0580b8]"
               >
-                Start Free Proposal
+                Generate Your First Proposal Free
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <a
-                href="#how-it-works"
-                className="inline-flex h-12 items-center gap-2 rounded-lg border border-slate-700 px-8 text-base font-semibold text-slate-300 transition-all hover:border-slate-500 hover:text-white"
-              >
-                See How It Works
-              </a>
+              <p className="mt-3 text-sm text-gray-400">No credit card. No signup required to start.</p>
             </div>
-
-            {/* Social proof */}
-            <div className="mt-16 flex flex-col items-center gap-4 border-t border-slate-800 pt-8">
-              <p className="text-sm text-slate-500">
-                Trusted by architecture, engineering, and construction firms
-              </p>
-              <div className="flex items-center gap-8">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">500+</div>
-                  <div className="text-xs text-slate-500">Proposals Generated</div>
-                </div>
-                <div className="h-8 w-px bg-slate-800" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">3.2x</div>
-                  <div className="text-xs text-slate-500">Faster Than Manual</div>
-                </div>
-                <div className="h-8 w-px bg-slate-800" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">41%</div>
-                  <div className="text-xs text-slate-500">Avg Win Rate</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pain Points */}
-      <section className="relative bg-slate-50 py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              The Problem
-            </h2>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              AEC Proposals Are Broken
-            </p>
-            <p className="mt-4 text-lg text-slate-600">
-              Your firm wins on expertise, not on paperwork. But the industry
-              hasn&apos;t caught up.
-            </p>
-          </div>
-          <div className="mx-auto mt-16 grid max-w-5xl gap-8 sm:grid-cols-3">
-            {painPoints.map((point) => (
-              <div
-                key={point.stat}
-                className="group relative rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-all hover:shadow-md hover:border-slate-300"
-              >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600">
-                  <point.icon className="h-6 w-6" />
-                </div>
-                <div className="mb-2 text-3xl font-bold text-slate-900">
-                  {point.stat}
-                </div>
-                <p className="text-sm leading-relaxed text-slate-600">
-                  {point.description}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="relative bg-white py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              How It Works
+      <section id="how-it-works" className="border-t border-gray-100 bg-gray-50 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mx-auto max-w-2xl text-center mb-14">
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+              Paste. Review. Export. Done.
             </h2>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Three Steps to a Winning Proposal
-            </p>
-            <p className="mt-4 text-lg text-slate-600">
-              From RFP to polished proposal in minutes, not days.
+            <p className="mt-3 text-gray-600">
+              Three steps from RFP to ready-to-submit proposal.
             </p>
           </div>
-          <div className="mx-auto mt-16 grid max-w-5xl gap-6 lg:grid-cols-3">
-            {steps.map((step, index) => (
-              <div key={step.title} className="relative">
-                {/* Connector line */}
-                {index < steps.length - 1 && (
-                  <div className="absolute right-0 top-16 hidden h-px w-6 bg-slate-300 lg:block" style={{ right: "-12px" }} />
-                )}
-                <div className="rounded-2xl border border-slate-200 bg-white p-8 transition-all hover:shadow-lg hover:border-blue-200">
-                  <div className="mb-4 flex items-center gap-4">
-                    <span className="text-4xl font-bold text-blue-100">
-                      {step.number}
-                    </span>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">
-                      <step.icon className="h-5 w-5" />
-                    </div>
+
+          <div className="mx-auto max-w-4xl grid gap-6 sm:grid-cols-3">
+            {[
+              {
+                icon: FileText,
+                step: "1",
+                title: "Paste your RFP",
+                desc: "Copy-paste the RFP, email, or project description. AI extracts requirements, deadlines, scope, and compliance needs in seconds.",
+              },
+              {
+                icon: Sparkles,
+                step: "2",
+                title: "Review the draft",
+                desc: "AI generates a complete proposal with your firm name, team bios, past projects, and fee structure. Regenerate any section with one click.",
+              },
+              {
+                icon: Download,
+                step: "3",
+                title: "Export & submit",
+                desc: "Download as Word or PDF. Done. What used to take your weekend now takes your lunch break.",
+              },
+            ].map((item) => (
+              <div key={item.step} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0696d7] text-white text-sm font-bold">
+                    {item.step}
                   </div>
-                  <h3 className="mb-2 text-xl font-bold text-slate-900">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-slate-600">
-                    {step.description}
-                  </p>
+                  <item.icon className="h-5 w-5 text-gray-400" />
                 </div>
+                <h3 className="text-base font-semibold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -339,102 +113,174 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="relative bg-[#0f172a] py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-blue-400">
-              Features
+      <section id="features" className="border-t border-gray-100 bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mx-auto max-w-2xl text-center mb-14">
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+              Not another generic AI tool.
             </h2>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Built for AEC, Not Adapted From Generic AI
-            </p>
-            <p className="mt-4 text-lg text-slate-400">
-              Every feature is designed around how architecture, engineering, and
-              construction firms actually create proposals.
+            <p className="mt-3 text-gray-600">
+              Built for how A/E firms actually write proposals. Not adapted from a marketing template.
             </p>
           </div>
-          <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-2">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="group rounded-2xl border border-slate-800 bg-slate-900/50 p-8 transition-all hover:border-blue-800/50 hover:bg-slate-800/50"
-              >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600/10 text-blue-400">
-                  <feature.icon className="h-6 w-6" />
+
+          <div className="mx-auto max-w-4xl grid gap-6 sm:grid-cols-2">
+            {[
+              {
+                icon: Building2,
+                title: "Your firm, not a template",
+                desc: "AI references your actual team members, certifications, and past projects by name. The output reads like you wrote it — because it learned from your past proposals.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "Compliance checklist",
+                desc: "AI parses every requirement from the RFP — certifications, insurance, page limits, deadlines — and flags what you're missing before you submit.",
+              },
+              {
+                icon: Target,
+                title: "Go/No-Go scorecard",
+                desc: "Before you spend 40 hours, paste the RFP and get a fit score. Is this worth pursuing? AI tells you based on your firm's track record.",
+              },
+              {
+                icon: Users,
+                title: "Website auto-import",
+                desc: "Paste your firm URL. AI scrapes your team bios, project portfolio, and services — auto-fills your profile in seconds. No data entry.",
+              },
+            ].map((item) => (
+              <div key={item.title} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition-all">
+                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-[#0696d7]">
+                  <item.icon className="h-5 w-5" />
                 </div>
-                <h3 className="mb-2 text-lg font-bold text-white">
-                  {feature.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-slate-400">
-                  {feature.description}
-                </p>
+                <h3 className="text-base font-semibold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="relative bg-slate-50 py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              Pricing
+      {/* ROI Calculator */}
+      <section className="border-t border-gray-100 bg-gray-50 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mx-auto max-w-2xl text-center mb-14">
+            <div className="inline-flex items-center gap-2 text-[#0696d7] mb-3">
+              <Calculator className="h-5 w-5" />
+              <span className="text-sm font-semibold">The Math</span>
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+              Every proposal costs your firm $9,000 in staff time.
             </h2>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Pay Per Proposal, Not Per Seat
-            </p>
-            <p className="mt-4 text-lg text-slate-600">
-              No subscriptions. No commitments. Pay only when you generate a
-              proposal.
+            <p className="mt-3 text-gray-600">
+              At $150/hr and 60 hours per proposal, that&apos;s real money walking out the door on work you can&apos;t bill.
             </p>
           </div>
-          <div className="mx-auto mt-16 grid max-w-5xl gap-8 lg:grid-cols-3">
-            {pricingTiers.map((tier) => (
+
+          <div className="mx-auto max-w-3xl grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <Clock className="h-4 w-4 text-red-500" />
+                <span className="text-sm text-gray-500">Without BILLIT</span>
+              </div>
+              <p className="text-3xl font-bold text-gray-900">60 hrs</p>
+              <p className="text-sm text-gray-500 mt-1">per proposal</p>
+            </div>
+            <div className="rounded-xl border border-[#0696d7] bg-blue-50 p-6 text-center shadow-sm ring-1 ring-[#0696d7]/20">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <Sparkles className="h-4 w-4 text-[#0696d7]" />
+                <span className="text-sm text-[#0696d7] font-medium">With BILLIT</span>
+              </div>
+              <p className="text-3xl font-bold text-[#0696d7]">2 hrs</p>
+              <p className="text-sm text-gray-500 mt-1">per proposal</p>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <span className="text-sm text-gray-500">You save</span>
+              </div>
+              <p className="text-3xl font-bold text-emerald-600">$8,700</p>
+              <p className="text-sm text-gray-500 mt-1">per proposal</p>
+            </div>
+          </div>
+
+          <p className="mx-auto max-w-lg text-center text-sm text-gray-500 mt-8">
+            Do 15 proposals a year? That&apos;s $130K in staff time recovered. BILLIT pays for itself on your first proposal.
+          </p>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="border-t border-gray-100 bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mx-auto max-w-2xl text-center mb-14">
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+              Your first proposal is free. Seriously.
+            </h2>
+            <p className="mt-3 text-gray-600">
+              No credit card. No commitment. Pay per proposal after that.
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-4xl grid gap-6 sm:grid-cols-3">
+            {[
+              {
+                name: "Starter",
+                price: "$149",
+                desc: "One proposal at a time",
+                features: ["AI proposal generation", "RFP parsing & compliance matrix", "PDF + Word export", "1 user"],
+                cta: "Get Started",
+                highlighted: false,
+              },
+              {
+                name: "Professional",
+                price: "$299",
+                desc: "For firms that pursue multiple projects",
+                features: ["Everything in Starter", "Firm voice matching", "Go/No-Go scorecard", "Website auto-import", "Win/loss analytics", "5 users"],
+                cta: "Start Winning",
+                highlighted: true,
+              },
+              {
+                name: "Enterprise",
+                price: "Custom",
+                desc: "For firms with complex needs",
+                features: ["Everything in Professional", "Unlimited users", "CRM / Deltek integration", "Custom templates", "Dedicated support", "API access"],
+                cta: "Contact Sales",
+                highlighted: false,
+              },
+            ].map((tier) => (
               <div
                 key={tier.name}
-                className={`relative rounded-2xl border p-8 transition-all ${
+                className={`rounded-xl border p-6 ${
                   tier.highlighted
-                    ? "border-blue-600 bg-white shadow-xl shadow-blue-600/10 ring-1 ring-blue-600 scale-[1.02]"
-                    : "border-slate-200 bg-white shadow-sm hover:shadow-md"
+                    ? "border-[#0696d7] shadow-md ring-1 ring-[#0696d7]/20 relative"
+                    : "border-gray-200 shadow-sm"
                 }`}
               >
                 {tier.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-[#0696d7] px-3 py-1 text-xs font-semibold text-white">
                     Most Popular
                   </div>
                 )}
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold text-slate-900">
-                    {tier.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {tier.description}
-                  </p>
+                <div className="mb-4">
+                  <h3 className="font-semibold text-gray-900">{tier.name}</h3>
+                  <p className="text-sm text-gray-500 mt-0.5">{tier.desc}</p>
                 </div>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-slate-900">
-                    ${tier.price}
-                  </span>
-                  <span className="text-sm text-slate-500"> / proposal</span>
+                <div className="mb-5">
+                  <span className="text-3xl font-bold text-gray-900">{tier.price}</span>
+                  {tier.price !== "Custom" && <span className="text-sm text-gray-500"> / proposal</span>}
                 </div>
-                <ul className="mb-8 space-y-3">
-                  {tier.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-3 text-sm text-slate-600"
-                    >
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
-                      {feature}
+                <ul className="space-y-2.5 mb-6">
+                  {tier.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                      <Check className="h-4 w-4 text-[#0696d7] mt-0.5 shrink-0" />
+                      {f}
                     </li>
                   ))}
                 </ul>
                 <Link
-                  href="/login"
-                  className={`flex h-11 w-full items-center justify-center rounded-lg text-sm font-semibold transition-all ${
+                  href="/proposals/new"
+                  className={`flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium ${
                     tier.highlighted
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25 hover:bg-blue-500"
-                      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400"
+                      ? "bg-[#0696d7] text-white hover:bg-[#0580b8]"
+                      : "border border-gray-300 text-gray-700 hover:bg-gray-50"
                   }`}
                 >
                   {tier.cta}
@@ -445,20 +291,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Banner */}
-      <section className="relative overflow-hidden bg-[#0f172a] py-24 sm:py-32">
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-blue-600/15 blur-[100px]" />
-        <div className="relative mx-auto max-w-4xl px-6 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Stop Losing Proposals to Firms With Better Marketing
+      {/* Final CTA */}
+      <section className="border-t border-gray-100 bg-gray-50 py-20 sm:py-24">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+            Your next RFP doesn&apos;t have to eat your weekend.
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-slate-400">
-            Your expertise wins projects. Let AI handle the paperwork.
+          <p className="mx-auto mt-4 max-w-lg text-gray-600">
+            Paste the RFP. Get the proposal. Keep designing.
           </p>
-          <div className="mt-10">
+          <div className="mt-8">
             <Link
-              href="/login"
-              className="inline-flex h-12 items-center gap-2 rounded-lg bg-blue-600 px-8 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 hover:shadow-blue-600/40 hover:translate-y-[-1px]"
+              href="/proposals/new"
+              className="inline-flex h-12 items-center gap-2 rounded-lg bg-[#0696d7] px-8 text-base font-semibold text-white shadow-sm hover:bg-[#0580b8]"
             >
               Generate Your First Proposal Free
               <ArrowRight className="h-4 w-4" />
@@ -468,46 +313,22 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-12">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+      <footer className="border-t border-gray-200 bg-white py-8">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 font-bold text-white text-xs">
-                B
+              <div className="flex h-6 w-6 items-center justify-center rounded bg-[#0696d7]">
+                <Building2 className="h-3.5 w-3.5 text-white" />
               </div>
-              <span className="text-base font-bold text-slate-900 tracking-tight">
-                BILLIT
-              </span>
+              <span className="text-sm font-bold text-gray-900">BILLIT</span>
             </div>
-            <div className="flex items-center gap-6">
-              <a
-                href="#features"
-                className="text-sm text-slate-500 transition-colors hover:text-slate-900"
-              >
-                Features
-              </a>
-              <a
-                href="#pricing"
-                className="text-sm text-slate-500 transition-colors hover:text-slate-900"
-              >
-                Pricing
-              </a>
-              <a
-                href="#how-it-works"
-                className="text-sm text-slate-500 transition-colors hover:text-slate-900"
-              >
-                How It Works
-              </a>
-              <Link
-                href="/login"
-                className="text-sm text-slate-500 transition-colors hover:text-slate-900"
-              >
-                Sign In
-              </Link>
+            <div className="flex items-center gap-6 text-sm text-gray-500">
+              <a href="#how-it-works" className="hover:text-gray-900">How It Works</a>
+              <a href="#features" className="hover:text-gray-900">Features</a>
+              <a href="#pricing" className="hover:text-gray-900">Pricing</a>
+              <Link href="/login" className="hover:text-gray-900">Sign In</Link>
             </div>
-            <p className="text-sm text-slate-400">
-              &copy; {new Date().getFullYear()} BILLIT. All rights reserved.
-            </p>
+            <p className="text-xs text-gray-400">&copy; {new Date().getFullYear()} BILLIT</p>
           </div>
         </div>
       </footer>
