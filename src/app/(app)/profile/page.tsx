@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,6 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Separator } from "@/components/ui/separator"
 import { Building2, Upload, Save, CheckCircle2, Globe, Loader2 } from "lucide-react"
 import type { Profile } from "@/lib/types"
+import { useSupabaseUser } from "@/hooks/use-supabase-user"
+
+const isDevMode = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("placeholder")
 
 const AEC_SERVICES = [
   "Architecture",
@@ -27,6 +30,7 @@ const AEC_SERVICES = [
 ]
 
 export default function ProfilePage() {
+  const { userId, loading: userLoading, supabase } = useSupabaseUser()
   const [profile, setProfile] = useState<Omit<Profile, "id" | "created_at">>({
     company_name: "",
     logo_url: null,
@@ -37,10 +41,53 @@ export default function ProfilePage() {
   })
   const [certificationsInput, setCertificationsInput] = useState("")
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [loadingProfile, setLoadingProfile] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [websiteUrl, setWebsiteUrl] = useState("")
   const [scraping, setScraping] = useState(false)
   const [scrapeResult, setScrapeResult] = useState<string | null>(null)
   const [scrapeError, setScrapeError] = useState<string | null>(null)
+
+  // Load profile from Supabase on mount
+  useEffect(() => {
+    if (userLoading) return
+    if (!userId || isDevMode) {
+      setLoadingProfile(false)
+      return
+    }
+
+    async function loadProfile() {
+      try {
+        const { data, error: fetchError } = await supabase
+          .from("profiles")
+          .select()
+          .eq("id", userId)
+          .single()
+
+        if (fetchError) throw fetchError
+
+        if (data) {
+          setProfile({
+            company_name: data.company_name || "",
+            logo_url: data.logo_url || null,
+            services: data.services || [],
+            certifications: data.certifications || [],
+            bio: data.bio || "",
+            industry_focus: data.industry_focus || "",
+          })
+          setCertificationsInput((data.certifications || []).join(", "))
+        }
+      } catch (err) {
+        console.error("Failed to load profile:", err)
+        setError("Failed to load profile. Using local state.")
+      } finally {
+        setLoadingProfile(false)
+      }
+    }
+
+    loadProfile()
+  }, [userId, userLoading])
 
   async function handleScrapeWebsite() {
     if (!websiteUrl.trim()) return
@@ -97,17 +144,41 @@ export default function ProfilePage() {
     }))
   }
 
-  function handleSave() {
+  async function handleSave() {
     const certs = certificationsInput
       .split(",")
       .map((c) => c.trim())
       .filter(Boolean)
     const profileToSave = { ...profile, certifications: certs }
-    // MVP: would save to Supabase profiles table
-    // await supabase.from("profiles").upsert(profileToSave)
-    console.log("Profile to save:", profileToSave)
+
+    if (!isDevMode && userId) {
+      setSaving(true)
+      setError(null)
+      try {
+        const { error: upsertError } = await supabase
+          .from("profiles")
+          .upsert({ id: userId, ...profileToSave })
+
+        if (upsertError) throw upsertError
+      } catch (err) {
+        console.error("Failed to save profile:", err)
+        setError("Failed to save profile. Please try again.")
+        setSaving(false)
+        return
+      }
+      setSaving(false)
+    }
+
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
+  }
+
+  if (userLoading || loadingProfile) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
   return (
@@ -118,6 +189,12 @@ export default function ProfilePage() {
           Define your company information. This data powers AI-generated proposals tailored to your firm.
         </p>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 rounded-md bg-red-50 border border-red-200 px-4 py-3">
+          <p className="text-sm text-red-700 font-medium">{error}</p>
+        </div>
+      )}
 
       {/* Auto-Populate from Website */}
       <Card>
@@ -283,13 +360,15 @@ export default function ProfilePage() {
 
           <Card>
             <CardContent className="pt-6">
-              <Button onClick={handleSave} className="w-full" size="lg">
-                {saved ? (
+              <Button onClick={handleSave} className="w-full" size="lg" disabled={saving}>
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : saved ? (
                   <CheckCircle2 className="h-4 w-4" />
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
-                {saved ? "Profile Saved" : "Save Profile"}
+                {saving ? "Saving..." : saved ? "Profile Saved" : "Save Profile"}
               </Button>
               {saved && (
                 <p className="text-sm text-emerald-600 text-center mt-2">

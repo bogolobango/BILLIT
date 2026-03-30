@@ -1,11 +1,14 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Upload, Trash2, FileText, Info } from "lucide-react"
+import { Upload, Trash2, FileText, Info, Loader2 } from "lucide-react"
 import type { PastProposal } from "@/lib/types"
+import { useSupabaseUser } from "@/hooks/use-supabase-user"
+
+const isDevMode = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("placeholder")
 
 const INITIAL_PROPOSALS: PastProposal[] = [
   {
@@ -41,8 +44,47 @@ function formatFileSize(): string {
 }
 
 export default function ProposalsPage() {
-  const [proposals, setProposals] = useState<PastProposal[]>(INITIAL_PROPOSALS)
+  const { userId, loading: userLoading, supabase } = useSupabaseUser()
+  const [proposals, setProposals] = useState<PastProposal[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
+  const [loadingProposals, setLoadingProposals] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+
+  // Load proposals from Supabase on mount
+  useEffect(() => {
+    if (userLoading) return
+    if (!userId || isDevMode) {
+      setProposals(INITIAL_PROPOSALS)
+      setLoadingProposals(false)
+      return
+    }
+
+    async function loadProposals() {
+      try {
+        const { data, error: fetchError } = await supabase
+          .from("past_proposals")
+          .select()
+          .eq("profile_id", userId)
+
+        if (fetchError) throw fetchError
+
+        if (data && data.length > 0) {
+          setProposals(data as PastProposal[])
+        } else if (isDevMode) {
+          setProposals(INITIAL_PROPOSALS)
+        }
+      } catch (err) {
+        console.error("Failed to load proposals:", err)
+        setError("Failed to load proposals.")
+        setProposals(INITIAL_PROPOSALS)
+      } finally {
+        setLoadingProposals(false)
+      }
+    }
+
+    loadProposals()
+  }, [userId, userLoading])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -60,7 +102,7 @@ export default function ProposalsPage() {
 
     const files = Array.from(e.dataTransfer.files)
     addFiles(files)
-  }, [])
+  }, [userId])
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files) {
@@ -69,7 +111,7 @@ export default function ProposalsPage() {
     }
   }
 
-  function addFiles(files: File[]) {
+  async function addFiles(files: File[]) {
     const validTypes = [
       "application/pdf",
       "application/msword",
@@ -80,9 +122,58 @@ export default function ProposalsPage() {
       (f) => validTypes.includes(f.type) || f.name.endsWith(".pdf") || f.name.endsWith(".doc") || f.name.endsWith(".docx")
     )
 
+    if (validFiles.length === 0) return
+
+    if (!isDevMode && userId) {
+      setUploading(true)
+      setError(null)
+
+      for (const file of validFiles) {
+        try {
+          // Upload file to Supabase Storage
+          const filePath = `${userId}/${Date.now()}_${file.name}`
+          const { error: uploadError } = await supabase.storage
+            .from("proposals")
+            .upload(filePath, file)
+
+          if (uploadError) throw uploadError
+
+          // Get the public URL
+          const { data: urlData } = supabase.storage
+            .from("proposals")
+            .getPublicUrl(filePath)
+
+          const fileUrl = urlData?.publicUrl || filePath
+
+          // Insert record into past_proposals
+          const { data, error: insertError } = await supabase
+            .from("past_proposals")
+            .insert({
+              profile_id: userId,
+              file_url: fileUrl,
+              file_name: file.name,
+              extracted_text: null,
+            })
+            .select()
+            .single()
+
+          if (insertError) throw insertError
+
+          setProposals((prev) => [data as PastProposal, ...prev])
+        } catch (err) {
+          console.error("Failed to upload proposal:", err)
+          setError(`Failed to upload ${file.name}. Please try again.`)
+        }
+      }
+
+      setUploading(false)
+      return
+    }
+
+    // Dev mode fallback: local state only
     const newProposals: PastProposal[] = validFiles.map((file) => ({
       id: crypto.randomUUID(),
-      profile_id: "demo",
+      profile_id: userId || "demo",
       file_url: "",
       file_name: file.name,
       extracted_text: null,
@@ -92,8 +183,46 @@ export default function ProposalsPage() {
     setProposals((prev) => [...newProposals, ...prev])
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
+    if (!isDevMode && userId) {
+      try {
+        // Find the proposal to get the file_url for storage deletion
+        const proposal = proposals.find((p) => p.id === id)
+
+        if (proposal?.file_url) {
+          // Extract the storage path from the URL
+          const urlParts = proposal.file_url.split("/proposals/")
+          const storagePath = urlParts.length > 1 ? urlParts[urlParts.length - 1] : null
+
+          if (storagePath) {
+            await supabase.storage
+              .from("proposals")
+              .remove([storagePath])
+          }
+        }
+
+        const { error: deleteError } = await supabase
+          .from("past_proposals")
+          .delete()
+          .eq("id", id)
+
+        if (deleteError) throw deleteError
+      } catch (err) {
+        console.error("Failed to delete proposal:", err)
+        setError("Failed to delete proposal. Please try again.")
+        return
+      }
+    }
+
     setProposals((prev) => prev.filter((p) => p.id !== id))
+  }
+
+  if (userLoading || loadingProposals) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
   return (
@@ -104,6 +233,12 @@ export default function ProposalsPage() {
           Upload previous proposals so the AI can learn your firm's writing style, tone, and formatting preferences.
         </p>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 rounded-md bg-red-50 border border-red-200 px-4 py-3">
+          <p className="text-sm text-red-700 font-medium">{error}</p>
+        </div>
+      )}
 
       <Separator />
 
@@ -143,12 +278,21 @@ export default function ProposalsPage() {
             <p className="text-sm font-medium">
               {isDragOver ? "Drop files here" : "Drag and drop proposal files here"}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              or click to browse your files
-            </p>
-            <p className="text-xs text-muted-foreground mt-3">
-              Accepted formats: PDF, DOC, DOCX
-            </p>
+            {uploading ? (
+              <div className="flex items-center gap-2 mt-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <p className="text-sm text-muted-foreground">Uploading...</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground mt-1">
+                  or click to browse your files
+                </p>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Accepted formats: PDF, DOC, DOCX
+                </p>
+              </>
+            )}
             <input
               type="file"
               className="sr-only"

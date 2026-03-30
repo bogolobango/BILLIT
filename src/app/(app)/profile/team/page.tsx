@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,8 +8,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Plus, Trash2, UserCircle, X } from "lucide-react"
+import { Plus, Trash2, UserCircle, X, Loader2 } from "lucide-react"
 import type { TeamMember } from "@/lib/types"
+import { useSupabaseUser } from "@/hooks/use-supabase-user"
+
+const isDevMode = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("placeholder")
 
 const INITIAL_MEMBERS: TeamMember[] = [
   {
@@ -57,16 +60,52 @@ const EMPTY_FORM = {
 }
 
 export default function TeamPage() {
-  const [members, setMembers] = useState<TeamMember[]>(INITIAL_MEMBERS)
+  const { userId, loading: userLoading, supabase } = useSupabaseUser()
+  const [members, setMembers] = useState<TeamMember[]>([])
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
+  const [loadingMembers, setLoadingMembers] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  function handleAdd() {
+  // Load team members from Supabase on mount
+  useEffect(() => {
+    if (userLoading) return
+    if (!userId || isDevMode) {
+      setMembers(INITIAL_MEMBERS)
+      setLoadingMembers(false)
+      return
+    }
+
+    async function loadMembers() {
+      try {
+        const { data, error: fetchError } = await supabase
+          .from("team_members")
+          .select()
+          .eq("profile_id", userId)
+
+        if (fetchError) throw fetchError
+
+        if (data && data.length > 0) {
+          setMembers(data as TeamMember[])
+        } else if (isDevMode) {
+          setMembers(INITIAL_MEMBERS)
+        }
+      } catch (err) {
+        console.error("Failed to load team members:", err)
+        setError("Failed to load team members.")
+        setMembers(INITIAL_MEMBERS)
+      } finally {
+        setLoadingMembers(false)
+      }
+    }
+
+    loadMembers()
+  }, [userId, userLoading])
+
+  async function handleAdd() {
     if (!form.name || !form.title) return
 
-    const newMember: TeamMember = {
-      id: crypto.randomUUID(),
-      profile_id: "demo",
+    const memberData = {
       name: form.name,
       title: form.title,
       role: form.role,
@@ -79,13 +118,63 @@ export default function TeamPage() {
       photo_url: null,
     }
 
+    if (!isDevMode && userId) {
+      try {
+        const { data, error: insertError } = await supabase
+          .from("team_members")
+          .insert({ profile_id: userId, ...memberData })
+          .select()
+          .single()
+
+        if (insertError) throw insertError
+
+        setMembers((prev) => [data as TeamMember, ...prev])
+        setForm(EMPTY_FORM)
+        setShowForm(false)
+        return
+      } catch (err) {
+        console.error("Failed to add team member:", err)
+        setError("Failed to add team member. Please try again.")
+        return
+      }
+    }
+
+    const newMember: TeamMember = {
+      id: crypto.randomUUID(),
+      profile_id: userId || "demo",
+      ...memberData,
+    }
+
     setMembers((prev) => [newMember, ...prev])
     setForm(EMPTY_FORM)
     setShowForm(false)
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
+    if (!isDevMode && userId) {
+      try {
+        const { error: deleteError } = await supabase
+          .from("team_members")
+          .delete()
+          .eq("id", id)
+
+        if (deleteError) throw deleteError
+      } catch (err) {
+        console.error("Failed to delete team member:", err)
+        setError("Failed to delete team member. Please try again.")
+        return
+      }
+    }
+
     setMembers((prev) => prev.filter((m) => m.id !== id))
+  }
+
+  if (userLoading || loadingMembers) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
   return (
@@ -104,6 +193,12 @@ export default function TeamPage() {
           </Button>
         )}
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 rounded-md bg-red-50 border border-red-200 px-4 py-3">
+          <p className="text-sm text-red-700 font-medium">{error}</p>
+        </div>
+      )}
 
       <Separator />
 

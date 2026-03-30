@@ -1,15 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Plus, Trash2, Pencil, X, FolderOpen } from "lucide-react"
+import { Plus, Trash2, Pencil, X, FolderOpen, Loader2 } from "lucide-react"
 import { PROJECT_TYPES } from "@/lib/types"
 import type { PastProject } from "@/lib/types"
+import { useSupabaseUser } from "@/hooks/use-supabase-user"
+
+const isDevMode = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("placeholder")
 
 const INITIAL_PROJECTS: PastProject[] = [
   {
@@ -71,10 +74,48 @@ function formatCurrency(value: number): string {
 }
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<PastProject[]>(INITIAL_PROJECTS)
+  const { userId, loading: userLoading, supabase } = useSupabaseUser()
+  const [projects, setProjects] = useState<PastProject[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
+  const [loadingProjects, setLoadingProjects] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Load projects from Supabase on mount
+  useEffect(() => {
+    if (userLoading) return
+    if (!userId || isDevMode) {
+      setProjects(INITIAL_PROJECTS)
+      setLoadingProjects(false)
+      return
+    }
+
+    async function loadProjects() {
+      try {
+        const { data, error: fetchError } = await supabase
+          .from("past_projects")
+          .select()
+          .eq("profile_id", userId)
+
+        if (fetchError) throw fetchError
+
+        if (data && data.length > 0) {
+          setProjects(data as PastProject[])
+        } else if (isDevMode) {
+          setProjects(INITIAL_PROJECTS)
+        }
+      } catch (err) {
+        console.error("Failed to load projects:", err)
+        setError("Failed to load projects.")
+        setProjects(INITIAL_PROJECTS)
+      } finally {
+        setLoadingProjects(false)
+      }
+    }
+
+    loadProjects()
+  }, [userId, userLoading])
 
   function openAddForm() {
     setEditingId(null)
@@ -97,7 +138,7 @@ export default function ProjectsPage() {
     setShowForm(true)
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!form.name || !form.client) return
 
     const projectData = {
@@ -115,6 +156,20 @@ export default function ProjectsPage() {
     }
 
     if (editingId) {
+      if (!isDevMode && userId) {
+        try {
+          const { error: updateError } = await supabase
+            .from("past_projects")
+            .update(projectData)
+            .eq("id", editingId)
+
+          if (updateError) throw updateError
+        } catch (err) {
+          console.error("Failed to update project:", err)
+          setError("Failed to update project. Please try again.")
+          return
+        }
+      }
       setProjects((prev) =>
         prev.map((p) =>
           p.id === editingId
@@ -123,9 +178,31 @@ export default function ProjectsPage() {
         )
       )
     } else {
+      if (!isDevMode && userId) {
+        try {
+          const { data, error: insertError } = await supabase
+            .from("past_projects")
+            .insert({ profile_id: userId, ...projectData })
+            .select()
+            .single()
+
+          if (insertError) throw insertError
+
+          setProjects((prev) => [data as PastProject, ...prev])
+          setForm(EMPTY_FORM)
+          setShowForm(false)
+          setEditingId(null)
+          return
+        } catch (err) {
+          console.error("Failed to add project:", err)
+          setError("Failed to add project. Please try again.")
+          return
+        }
+      }
+
       const newProject: PastProject = {
         id: crypto.randomUUID(),
-        profile_id: "demo",
+        profile_id: userId || "demo",
         ...projectData,
       }
       setProjects((prev) => [newProject, ...prev])
@@ -136,7 +213,22 @@ export default function ProjectsPage() {
     setEditingId(null)
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
+    if (!isDevMode && userId) {
+      try {
+        const { error: deleteError } = await supabase
+          .from("past_projects")
+          .delete()
+          .eq("id", id)
+
+        if (deleteError) throw deleteError
+      } catch (err) {
+        console.error("Failed to delete project:", err)
+        setError("Failed to delete project. Please try again.")
+        return
+      }
+    }
+
     setProjects((prev) => prev.filter((p) => p.id !== id))
   }
 
@@ -144,6 +236,14 @@ export default function ProjectsPage() {
     setShowForm(false)
     setEditingId(null)
     setForm(EMPTY_FORM)
+  }
+
+  if (userLoading || loadingProjects) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
   return (
@@ -162,6 +262,12 @@ export default function ProjectsPage() {
           </Button>
         )}
       </div>
+
+      {error && (
+        <div className="flex items-center gap-2 rounded-md bg-red-50 border border-red-200 px-4 py-3">
+          <p className="text-sm text-red-700 font-medium">{error}</p>
+        </div>
+      )}
 
       <Separator />
 

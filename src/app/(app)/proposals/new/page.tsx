@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { WizardProgress } from "@/components/layout/wizard-progress"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -39,26 +39,48 @@ import {
   FEE_STRUCTURES,
   PROPOSAL_SECTIONS,
 } from "@/lib/types"
+import { createClient } from "@/lib/supabase/client"
+import { saveAs } from "file-saver"
+import { generateDOCX } from "@/lib/export/to-docx"
+import { generatePDF } from "@/lib/export/to-pdf"
 
-const MOCK_TEAM = [
+interface SelectableTeamMember {
+  id: string
+  name: string
+  title: string
+  selected: boolean
+  [key: string]: unknown
+}
+interface SelectableProject {
+  id: string
+  name: string
+  client: string
+  selected: boolean
+  [key: string]: unknown
+}
+
+const MOCK_TEAM: SelectableTeamMember[] = [
   { id: "1", name: "Michael Torres", title: "Principal Architect", selected: true },
   { id: "2", name: "Jennifer Walsh", title: "Project Manager", selected: true },
   { id: "3", name: "David Kim", title: "Design Lead", selected: false },
   { id: "4", name: "Sarah Patel", title: "Structural Engineer", selected: false },
 ]
 
-const MOCK_PROJECTS = [
+const MOCK_PROJECTS: SelectableProject[] = [
   { id: "1", name: "Regional Medical Pavilion", client: "Pacific Health Systems", selected: true },
   { id: "2", name: "Westside Community Health Center", client: "Multnomah County", selected: true },
   { id: "3", name: "Cascade Medical Office Building", client: "Providence Health", selected: false },
 ]
 
 export default function NewProposalPage() {
+  const supabase = createClient()
   const [currentStep, setCurrentStep] = useState(1)
   const [rfpText, setRfpText] = useState("")
   const [companyName, setCompanyName] = useState("Apex Design Group")
-  const [selectedTeam, setSelectedTeam] = useState(MOCK_TEAM)
-  const [selectedProjects, setSelectedProjects] = useState(MOCK_PROJECTS)
+  const [selectedTeam, setSelectedTeam] = useState<SelectableTeamMember[]>(MOCK_TEAM)
+  const [selectedProjects, setSelectedProjects] = useState<SelectableProject[]>(MOCK_PROJECTS)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [proposalId, setProposalId] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [proposalGenerated, setProposalGenerated] = useState(false)
@@ -77,6 +99,34 @@ export default function NewProposalPage() {
   const [regenerateFeedback, setRegenerateFeedback] = useState<Record<string, string>>({})
   const [showRegenerateInput, setShowRegenerateInput] = useState<string | null>(null)
   const [proposalStatus, setProposalStatus] = useState("draft")
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        setUserId(user.id)
+
+        // Load profile
+        const { data: profile } = await supabase.from('profiles').select().eq('id', user.id).single()
+        if (profile?.company_name) setCompanyName(profile.company_name)
+
+        // Load team members
+        const { data: team } = await supabase.from('team_members').select().eq('profile_id', user.id)
+        if (team?.length) setSelectedTeam(team.map((t: Record<string, unknown>) => ({ ...t, id: t.id as string, name: t.name as string, title: t.title as string, selected: true })))
+
+        // Load past projects
+        const { data: projects } = await supabase.from('past_projects').select().eq('profile_id', user.id)
+        if (projects?.length) setSelectedProjects(projects.map((p: Record<string, unknown>) => ({ ...p, id: p.id as string, name: p.name as string, client: p.client as string, selected: true })))
+      } catch {
+        // Fallback to mock data in dev mode
+      }
+    }
+
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+    if (!url.includes("placeholder")) loadData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const toggleTeamMember = (id: string) => {
     setSelectedTeam(prev => prev.map(m => m.id === id ? { ...m, selected: !m.selected } : m))
@@ -123,6 +173,26 @@ export default function NewProposalPage() {
       const data = await res.json()
       if (data.sections) {
         setProposalContent(data)
+        // Save to Supabase
+        if (userId) {
+          try {
+            const { data: saved } = await supabase.from('proposals').insert({
+              profile_id: userId,
+              title: scopingData.description || `Proposal for ${scopingData.client_name}`,
+              client_name: scopingData.client_name,
+              project_type: scopingData.project_type,
+              status: 'draft',
+              rfp_source_type: 'paste',
+              rfp_text: rfpText,
+              scoping_data: scopingData,
+              compliance_checklist: complianceItems,
+              content: data,
+            }).select().single()
+            if (saved) setProposalId(saved.id)
+          } catch {
+            // Supabase save failed silently
+          }
+        }
       }
     } catch {
       setProposalContent({
@@ -188,6 +258,27 @@ export default function NewProposalPage() {
   }
   const updateComplianceStatus = (id: string, status: ComplianceItem["status"]) => {
     setComplianceItems(prev => prev.map(item => item.id === id ? { ...item, status } : item))
+  }
+
+  async function handleExportPDF() {
+    if (!proposalContent) return
+    const blob = await generatePDF(proposalContent, {
+      title: scopingData.description || "Proposal",
+      companyName,
+      clientName: scopingData.client_name,
+      primaryColor,
+    })
+    saveAs(blob, `${scopingData.client_name || "proposal"}-proposal.html`)
+  }
+
+  async function handleExportDOCX() {
+    if (!proposalContent) return
+    const blob = await generateDOCX(proposalContent, {
+      title: scopingData.description || "Proposal",
+      companyName,
+      clientName: scopingData.client_name,
+    })
+    saveAs(blob, `${scopingData.client_name || "proposal"}-proposal.docx`)
   }
 
   return (
@@ -624,18 +715,17 @@ export default function NewProposalPage() {
                 <CardHeader><CardTitle className="text-base">Export</CardTitle></CardHeader>
                 <CardContent className="space-y-3">
                   <div className="p-4 rounded-xl bg-accent text-center">
-                    <Badge className="mb-2">First Proposal Free</Badge>
-                    <p className="text-2xl font-bold text-primary">$0</p>
-                    <p className="text-xs text-muted-foreground">then $149/proposal</p>
+                    <Badge className="mb-2 bg-primary text-primary-foreground">Beta — Free</Badge>
+                    <p className="text-sm text-muted-foreground mt-1">All exports free during beta</p>
                   </div>
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" size="lg" onClick={handleExportDOCX}>
                     <Download className="h-4 w-4" />
-                    Export Proposal
+                    Export Proposal (Free Beta)
                   </Button>
                   <Separator />
                   <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" size="sm" onClick={() => alert("PDF export")}><Download className="h-3.5 w-3.5" />PDF</Button>
-                    <Button variant="outline" size="sm" onClick={() => alert("Word export")}><Download className="h-3.5 w-3.5" />Word</Button>
+                    <Button variant="outline" size="sm" onClick={handleExportPDF}><Download className="h-3.5 w-3.5" />PDF</Button>
+                    <Button variant="outline" size="sm" onClick={handleExportDOCX}><Download className="h-3.5 w-3.5" />Word</Button>
                   </div>
                 </CardContent>
               </Card>

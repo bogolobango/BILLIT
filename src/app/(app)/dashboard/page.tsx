@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -23,6 +23,7 @@ import {
   ChevronDown,
 } from "lucide-react"
 import type { ProposalStatus } from "@/lib/types"
+import { createClient } from "@/lib/supabase/client"
 
 interface MockProposal {
   id: string
@@ -155,9 +156,46 @@ const LOST_REASONS = [
 ]
 
 export default function DashboardPage() {
+  const supabase = createClient()
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState("all")
   const [proposals, setProposals] = useState<MockProposal[]>(INITIAL_PROPOSALS)
+
+  useEffect(() => {
+    async function loadProposals() {
+      try {
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+        if (url.includes("placeholder")) return // Keep mock data in dev mode
+
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data } = await supabase
+          .from("proposals")
+          .select()
+          .eq("profile_id", user.id)
+          .order("generated_at", { ascending: false })
+
+        if (data?.length) {
+          setProposals(data.map((p: Record<string, unknown>) => ({
+            id: p.id as string,
+            title: p.title as string,
+            client_name: p.client_name as string,
+            project_type: p.project_type as string,
+            status: (p.status as ProposalStatus) || "draft",
+            generated_at: p.generated_at as string,
+            price_paid: p.price_paid as number | null,
+            estimated_value: 0,
+          })))
+        }
+      } catch {
+        // Fallback to mock data
+      }
+    }
+
+    loadProposals()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Feedback dialog state
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false)
@@ -176,20 +214,27 @@ export default function DashboardPage() {
   const handleStatusChange = (proposal: MockProposal, newStatus: ProposalStatus) => {
     setOpenDropdownId(null)
 
+    // Update locally immediately
+    setProposals(prev =>
+      prev.map(p => p.id === proposal.id ? { ...p, status: newStatus } : p)
+    )
+
+    // Persist to Supabase
+    try {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+      if (!url.includes("placeholder")) {
+        supabase.from("proposals").update({ status: newStatus }).eq("id", proposal.id).then()
+      }
+    } catch {
+      // Silent fail
+    }
+
     if (newStatus === "won" || newStatus === "lost") {
       setFeedbackProposal(proposal)
       setFeedbackOutcome(newStatus)
       setFeedbackReasons([])
       setFeedbackNotes("")
       setFeedbackDialogOpen(true)
-      // Update status immediately
-      setProposals(prev =>
-        prev.map(p => p.id === proposal.id ? { ...p, status: newStatus } : p)
-      )
-    } else {
-      setProposals(prev =>
-        prev.map(p => p.id === proposal.id ? { ...p, status: newStatus } : p)
-      )
     }
   }
 
